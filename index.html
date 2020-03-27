@@ -1,0 +1,184 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typeracer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><span id="mas">Typer</span>.com</h1>
+    </header>
+    
+    <div class="wrap">
+        <div class="loader">
+            <div class="mover"></div>
+        </div>
+        <div class="para">
+        </div>
+        <div class="userinput">
+            <input type="text" name="" id="tf1" placeholder="Start Typing Here....">
+            <p class="tickdown">00:30</p>
+        </div>
+        <div class="popup">
+            <div class="box">Sorry You Ran Out Of Time</div>
+        </div>
+        <button id="loadpara">Generate Text</button>
+        <div class="result">
+
+        </div>
+    </div>
+    <script>
+        //Getting data from JSON and Adding to LocalStorage
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+         localStorage.setItem('paragraphs',xhttp.responseText);
+        }
+        }
+        xhttp.open("GET",'RandomPara.json', true);
+        xhttp.send();
+
+        //onloading adding some paragraph
+
+        var LSPara = JSON.parse(localStorage.getItem('paragraphs'))
+        var loader = document.querySelector('#loadpara');
+        loader.addEventListener('click',GeneratePara);
+
+        function onLoadAdd(para){
+            for(var i=0;i<para.length;i++){
+        var span = document.createElement('span');
+        span.className = 'text';
+        span.innerText = para[i];
+        document.querySelector('.para').appendChild(span);
+            }
+        }
+        window.addEventListener('load',onLoadAdd);
+
+        var b = Math.floor((Math.random()*6));
+        var p = LSPara[b].split(' ');
+        onLoadAdd(p);
+
+        function GeneratePara(e){
+            var a = Math.floor((Math.random() * 6) );
+            var paragraph = LSPara[a].split(' ');
+            document.querySelector('.para').innerText = ''
+            onLoadAdd(paragraph);
+        }
+        
+        //some Variables
+        var mover = document.querySelector('.mover');
+        var input = document.querySelector('#tf1');
+        var p = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio suscipit vero quis aliquid nobis placeat';
+        var arr= p.split(' ');
+        var para = document.querySelector('.para');
+        input.addEventListener('keyup',takeInput);
+        
+        //class removing function
+        function timeout(node,clss,time){
+            setTimeout(()=>{
+                node.classList.remove(clss);
+            },time);
+        }
+
+        //Error adding classllist function
+        function addStyle(node,cls){
+            node.classList.add(cls);
+           if(cls === 'alert')
+           timeout(node,cls,600);
+           else
+           timeout(node,cls,1200);
+        }
+
+        //Main Variables
+        var s = document.querySelector('.para').childNodes;
+        var j = 1;
+        var l =  document.querySelector('.para').lastChild.innerText;
+        var mistakes = 0; 
+        var w = 6.2;
+        var min = 1;
+        var sec = 20;
+        var start = 0;
+
+        //Allreset Function Runs when time is over
+        function allReset()
+        {
+            var pop = document.querySelector('.popup');
+            pop.style.display = 'flex';
+            j = 1;
+            w = 6.2;
+            sec = 10;
+            start = 0;
+            setTimeout(()=>{
+                input.value = "";
+                pop.style.display = 'none';
+                document.querySelector('.mover').style.width = '5%';
+                document.querySelector('.tickdown').innerText = '00:20';
+            },3000);
+        }
+
+        //startTimer Function
+        function startTimer()
+        {
+            if(min)min --
+            sec --
+            var para = document.querySelector('.tickdown');
+            if(sec<10)
+            {
+                para.innerText = min + '0:0' + sec ;
+                para.style.color = '';
+            }
+            else
+            para.innerText = min + '0:' + sec ;
+            
+            setTimeout(()=>{
+                if(sec)
+                startTimer();
+                else
+                {
+                   allReset();
+                }
+            },1000);
+        }
+
+        //main function
+        function takeInput(e)
+        {            
+            if(start===0)
+            startTimer();
+            start++;
+            if(e.key == " ")
+            {
+                var color = '';
+                var word = this.value;
+                var v = word.split(' ')[0];          
+                if(v === s[j].innerText) 
+                {
+                    color = 'green';
+                    addStyle(s[j],'alert')
+                    w+=6.3;
+                    mover.style.width = w+'%'
+                    j++;
+                    if(v === l)
+                    {
+                        j=1;
+                        start = 0;
+                        sec = 10;
+                        console.log(mistakes);
+                        mover.style.width = '5%';
+                    }
+                }
+                else
+                {
+                    color = 'rgb(209, 14, 14)';
+                    addStyle(s[j],'alertRed')
+                    mistakes ++   
+                }
+                this.value = "";
+            }
+        }
+
+    </script>
+</body>
+</html>
